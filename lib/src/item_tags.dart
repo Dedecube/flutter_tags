@@ -66,7 +66,7 @@ class ItemTags extends StatefulWidget {
   final double textScaleFactor;
 
   /// Initial bool value
-  final bool active;
+  bool active;
 
   /// Initial bool value
   final bool pressEnabled;
@@ -201,6 +201,7 @@ class _ItemTagsState extends State<ItemTags> {
     if (_dataList != null) _dataList.removeListener(_didValueChange);
 
     _dataList = _dataListInherited.list.elementAt(widget.index);
+    _dataList.active = widget.active;
     _dataList.addListener(_didValueChange);
   }
 
@@ -250,6 +251,7 @@ class _ItemTagsState extends State<ItemTags> {
                   _dataList.active = true;
                 } else
                   _dataList.active = !_dataList.active;
+                widget.active = _dataList.active;
 
                 if (widget.onPressed != null)
                   widget.onPressed(Item(
