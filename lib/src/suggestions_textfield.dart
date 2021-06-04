@@ -13,12 +13,11 @@ typedef OnSubmittedCallback = void Function(String string);
 
 class SuggestionsTextField extends StatefulWidget {
   SuggestionsTextField(
-      {@required this.tagsTextField, this.onSubmitted, Key key})
-      : assert(tagsTextField != null),
-        super(key: key);
+      {required this.tagsTextField, this.onSubmitted, Key? key})
+      : super(key: key);
 
   final TagsTextField tagsTextField;
-  final OnSubmittedCallback onSubmitted;
+  final OnSubmittedCallback? onSubmitted;
 
   @override
   _SuggestionsTextFieldState createState() => _SuggestionsTextFieldState();
@@ -27,13 +26,13 @@ class SuggestionsTextField extends StatefulWidget {
 class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
   final _controller = TextEditingController();
 
-  List<String> _matches = List();
-  String _helperText;
+  List<String> _matches = <String>[];
+  String? _helperText;
   bool _helperCheck = true;
 
-  List<String> _suggestions;
-  double _fontSize;
-  InputDecoration _inputDecoration;
+  List<String>? _suggestions;
+  double? _fontSize;
+  InputDecoration? _inputDecoration;
 
   @override
   void initState() {
@@ -55,10 +54,10 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
           child: Container(
             //width: double.infinity,
             padding: _inputDecoration != null
-                ? _inputDecoration.contentPadding
+                ? _inputDecoration!.contentPadding
                 : EdgeInsets.symmetric(
-                    vertical: 6 * (_fontSize / 14),
-                    horizontal: 6 * (_fontSize / 14)),
+                    vertical: 6 * (_fontSize! / 14),
+                    horizontal: 6 * (_fontSize! / 14)),
             child: Text(
               _matches.isNotEmpty ? (_matches.first) : "",
               softWrap: false,
@@ -98,20 +97,20 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
             disabledBorder: InputBorder.none,
             errorBorder: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-                vertical: 6 * (_fontSize / 14),
-                horizontal: 6 * (_fontSize / 14)),
+                vertical: 6 * (_fontSize! / 14),
+                horizontal: 6 * (_fontSize! / 14)),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                color: Colors.blueGrey[300],
+                color: Colors.blueGrey[300]!,
               ),
             ),
             enabledBorder: UnderlineInputBorder(
               borderSide:
-                  BorderSide(color: Colors.blueGrey[400].withOpacity(0.3)),
+                  BorderSide(color: Colors.blueGrey[400]!.withOpacity(0.3)),
             ),
             border: UnderlineInputBorder(
               borderSide:
-                  BorderSide(color: Colors.blueGrey[400].withOpacity(0.3)),
+                  BorderSide(color: Colors.blueGrey[400]!.withOpacity(0.3)),
             ));
 
     return input.copyWith(
@@ -149,7 +148,7 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
   void _checkOnChanged(String str) {
     if (_suggestions != null) {
       _matches =
-          _suggestions.where((String sgt) => sgt.startsWith(str)).toList();
+          _suggestions!.where((String sgt) => sgt.startsWith(str)).toList();
 
       if (str.isEmpty) _matches = [];
 
@@ -162,7 +161,7 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
     }
 
     if (widget.tagsTextField.onChanged != null)
-      widget.tagsTextField.onChanged(str);
+      widget.tagsTextField.onChanged!(str);
   }
 }
 
@@ -191,19 +190,19 @@ class TagsTextField {
   final double width;
   final bool duplicates;
   final TextStyle textStyle;
-  final InputDecoration inputDecoration;
-  final bool autocorrect;
-  final List<String> suggestions;
+  final InputDecoration? inputDecoration;
+  final bool? autocorrect;
+  final List<String>? suggestions;
   final bool lowerCase;
-  final bool autofocus;
-  final String hintText;
-  final Color hintTextColor;
-  final Color suggestionTextColor;
-  final String helperText;
-  final TextStyle helperTextStyle;
-  final TextInputType keyboardType;
-  final TextCapitalization textCapitalization;
-  final int maxLength;
-  final OnSubmittedCallback onSubmitted;
-  final OnChangedCallback onChanged;
+  final bool? autofocus;
+  final String? hintText;
+  final Color? hintTextColor;
+  final Color? suggestionTextColor;
+  final String? helperText;
+  final TextStyle? helperTextStyle;
+  final TextInputType? keyboardType;
+  final TextCapitalization? textCapitalization;
+  final int? maxLength;
+  final OnSubmittedCallback? onSubmitted;
+  final OnChangedCallback? onChanged;
 }
