@@ -63,7 +63,7 @@ class ItemTags extends StatefulWidget {
   final double? textScaleFactor;
 
   /// Initial bool value
-  bool active;
+  final bool active;
 
   /// Initial bool value
   final bool pressEnabled;
