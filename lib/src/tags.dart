@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../tag.dart';
+import '../flutter_tags.dart';
 import 'util/custom_wrap.dart';
 import 'package:flutter_tags/src/suggestions_textfield.dart';
 
@@ -24,8 +24,7 @@ class Tags extends StatefulWidget {
       this.itemBuilder,
       this.textField,
       Key? key})
-      : assert(itemCount >= 0),
-        super(key: key);
+      : super(key: key);
 
   ///specific number of columns
   final int? columns;
@@ -82,7 +81,7 @@ class TagsState extends State<Tags> {
   Orientation _orientation = Orientation.portrait;
   double _width = 0;
 
-  final List<DataList> _list = <DataList>[];
+  final List<DataList> _list = [];
 
   List<Item> get getAllItem => _list.toList();
 
@@ -154,12 +153,14 @@ class TagsState extends State<Tags> {
         ? Container(
             alignment: Alignment.center,
             width: widget.symmetry ? _widthCalc() : widget.textField!.width,
+            padding: widget.textField!.padding,
             child: SuggestionsTextField(
               tagsTextField: widget.textField!,
               onSubmitted: (String str) {
                 if (!widget.textField!.duplicates) {
                   final List<DataList> lst =
-                      _list.where((l) => l.title == str).toList();
+                      // ignore: unnecessary_null_comparison
+                      _list.where((l) => l != null && l.title == str).toList();
 
                   if (lst.isNotEmpty) {
                     lst.forEach((d) => d.showDuplicate = true);
@@ -174,7 +175,7 @@ class TagsState extends State<Tags> {
           )
         : null;
 
-    List<Widget> finalList = <Widget>[];
+    List<Widget> finalList = [];
 
     List<Widget> itemList = List.generate(widget.itemCount, (i) {
       final Widget item = widget.itemBuilder!(i);
@@ -244,8 +245,10 @@ class DataListInherited extends InheritedWidget {
     return false;
   }
 
+  /*static DataListInherited of(BuildContext context) =>
+      context.inheritFromWidgetOfExactType(DataListInherited);*/
   static DataListInherited? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<DataListInherited>();
+      context.dependOnInheritedWidgetOfExactType();
 }
 
 /// Data List
@@ -270,7 +273,7 @@ class DataList extends ValueNotifier implements Item {
     return val;
   }
 
-  bool _showDuplicate;
+  bool _showDuplicate = false;
   set showDuplicate(bool a) {
     _showDuplicate = a;
     // rebuild only the specific Item that changes its value
@@ -278,7 +281,7 @@ class DataList extends ValueNotifier implements Item {
   }
 
   bool get active => _active;
-  bool _active;
+  bool _active = false;
   set active(bool a) {
     _active = a;
     // rebuild only the specific Item that changes its value

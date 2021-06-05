@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_tags/tag.dart';
+import 'package:flutter_tags/flutter_tags.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Tags Demo',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
@@ -69,9 +69,9 @@ class _MyHomePageState extends State<MyHomePage>
 
   bool _symmetry = false;
   bool _removeButton = true;
-  bool _singleItem = false;
+  bool _singleItem = true;
   bool _startDirection = false;
-  bool _horizontalScroll = false;
+  bool _horizontalScroll = true;
   bool _withSuggesttions = false;
   int _count = 0;
   int _column = 0;
@@ -98,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
+    //List<Item> lst = _tagStateKey.currentState?.getAllItem; lst.forEach((f) => print(f.title));
     return Scaffold(
       body: NestedScrollView(
           controller: _scrollViewController,
@@ -512,17 +513,21 @@ class _MyHomePageState extends State<MyHomePage>
                   icon: _icon[int.parse(item)],
                 )
               : null,
-          removeButton: _removeButton ? ItemTagsRemoveButton() : null,
+          removeButton: _removeButton
+              ? ItemTagsRemoveButton(
+                  onRemoved: () {
+                    setState(() {
+                      _items.removeAt(index);
+                    });
+                    return true;
+                  },
+                )
+              : null,
           textScaleFactor:
               utf8.encode(item.substring(0, 1)).length > 2 ? 0.8 : 1,
           textStyle: TextStyle(
             fontSize: _fontSize,
           ),
-          onRemoved: () {
-            setState(() {
-              _items.removeAt(index);
-            });
-          },
           onPressed: (item) => print(item),
         );
       },
@@ -571,38 +576,7 @@ class _MyHomePageState extends State<MyHomePage>
           _startDirection ? VerticalDirection.up : VerticalDirection.down,
       textDirection: _startDirection ? TextDirection.rtl : TextDirection.ltr,
       heightHorizontalScroll: 60 * (_fontSize / 14),
-      textField: TagsTextField(
-        autofocus: false,
-        textStyle: TextStyle(
-          fontSize: _fontSize,
-          //height: 1
-        ),
-        suggestions: _withSuggesttions
-            ? [
-                "One",
-                "two",
-                "android",
-                "Dart",
-                "flutter",
-                "test",
-                "tests",
-                "androids",
-                "androidsaaa",
-                "Test",
-                "suggest",
-                "suggestions",
-                "互联网",
-                "last",
-                "lest",
-                "炫舞时代"
-              ]
-            : null,
-        onSubmitted: (String str) {
-          setState(() {
-            _items.add(str);
-          });
-        },
-      ),
+      textField: _textField,
       itemCount: _items.length,
       itemBuilder: (index) {
         final item = _items[index];
@@ -629,17 +603,18 @@ class _MyHomePageState extends State<MyHomePage>
                 : null,
             removeButton: ItemTagsRemoveButton(
               backgroundColor: Colors.green[900],
+              onRemoved: () {
+                setState(() {
+                  _items.removeAt(index);
+                });
+                return true;
+              },
             ),
             textScaleFactor:
                 utf8.encode(item.substring(0, 1)).length > 2 ? 0.8 : 1,
             textStyle: TextStyle(
               fontSize: _fontSize,
             ),
-            onRemoved: () {
-              setState(() {
-                _items.removeAt(index);
-              });
-            },
           ),
           onTapDown: (details) => _tapPosition = details.globalPosition,
           onLongPress: () {
@@ -673,6 +648,45 @@ class _MyHomePageState extends State<MyHomePage>
             });
           },
         );
+      },
+    );
+  }
+
+  TagsTextField get _textField {
+    return TagsTextField(
+      autofocus: false,
+      //width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      textStyle: TextStyle(
+        fontSize: _fontSize,
+        //height: 1
+      ),
+      enabled: true,
+      constraintSuggestion: true,
+      suggestions: _withSuggesttions
+          ? [
+              "One",
+              "two",
+              "android",
+              "Dart",
+              "flutter",
+              "test",
+              "tests",
+              "androids",
+              "androidsaaa",
+              "Test",
+              "suggest",
+              "suggestions",
+              "互联网",
+              "last",
+              "lest",
+              "炫舞时代"
+            ]
+          : null,
+      onSubmitted: (String str) {
+        setState(() {
+          _items.add(str);
+        });
       },
     );
   }

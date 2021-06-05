@@ -322,6 +322,7 @@ class CustomRenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
+      default:
         return _computeIntrinsicWidthForHeight(height);
     }
   }
@@ -338,6 +339,7 @@ class CustomRenderWrap extends RenderBox
         }
         return width;
       case Axis.vertical:
+      default:
         return _computeIntrinsicWidthForHeight(height);
     }
   }
@@ -348,6 +350,7 @@ class CustomRenderWrap extends RenderBox
       case Axis.horizontal:
         return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
+      default:
         double height = 0.0;
         RenderBox? child = firstChild;
         while (child != null) {
@@ -365,6 +368,7 @@ class CustomRenderWrap extends RenderBox
       case Axis.horizontal:
         return _computeIntrinsicHeightForWidth(width);
       case Axis.vertical:
+      default:
         double height = 0.0;
         RenderBox? child = firstChild;
         while (child != null) {

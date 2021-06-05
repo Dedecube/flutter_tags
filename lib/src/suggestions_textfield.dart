@@ -26,12 +26,13 @@ class SuggestionsTextField extends StatefulWidget {
 class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
   final _controller = TextEditingController();
 
-  List<String> _matches = <String>[];
+  List<String> _matches = [];
   String? _helperText;
   bool _helperCheck = true;
 
   List<String>? _suggestions;
-  double? _fontSize;
+  late bool _constraintSuggestion;
+  double _fontSize = 14;
   InputDecoration? _inputDecoration;
 
   @override
@@ -43,11 +44,12 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
   Widget build(BuildContext context) {
     _helperText = widget.tagsTextField.helperText ?? "no matches";
     _suggestions = widget.tagsTextField.suggestions;
+    _constraintSuggestion = widget.tagsTextField.constraintSuggestion;
     _inputDecoration = widget.tagsTextField.inputDecoration;
-    _fontSize = widget.tagsTextField.textStyle.fontSize;
+    _fontSize = widget.tagsTextField.textStyle.fontSize!;
 
     return Stack(
-      alignment: Alignment.bottomLeft,
+      alignment: Alignment.centerLeft,
       children: <Widget>[
         Visibility(
           visible: _suggestions != null,
@@ -56,8 +58,8 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
             padding: _inputDecoration != null
                 ? _inputDecoration!.contentPadding
                 : EdgeInsets.symmetric(
-                    vertical: 6 * (_fontSize! / 14),
-                    horizontal: 6 * (_fontSize! / 14)),
+                    vertical: 6 * (_fontSize / 14),
+                    horizontal: 6 * (_fontSize / 14)),
             child: Text(
               _matches.isNotEmpty ? (_matches.first) : "",
               softWrap: false,
@@ -66,7 +68,7 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
                 height: widget.tagsTextField.textStyle.height == null
                     ? 1
                     : widget.tagsTextField.textStyle.height,
-                fontSize: _fontSize ?? null,
+                fontSize: _fontSize,
                 color: widget.tagsTextField.suggestionTextColor ?? Colors.red,
               ),
             ),
@@ -74,6 +76,7 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
         ),
         TextField(
           controller: _controller,
+          enabled: widget.tagsTextField.enabled,
           autofocus: widget.tagsTextField.autofocus ?? true,
           keyboardType: widget.tagsTextField.keyboardType ?? null,
           textCapitalization: widget.tagsTextField.textCapitalization ??
@@ -97,8 +100,8 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
             disabledBorder: InputBorder.none,
             errorBorder: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-                vertical: 6 * (_fontSize! / 14),
-                horizontal: 6 * (_fontSize! / 14)),
+                vertical: 6 * (_fontSize / 14),
+                horizontal: 6 * (_fontSize / 14)),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
                 color: Colors.blueGrey[300]!,
@@ -124,14 +127,14 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
   void _onSubmitted(String str) {
     var onSubmitted = widget.onSubmitted;
 
-    if (_suggestions != null) str = _matches.first;
+    if (_suggestions != null && _matches.isNotEmpty) str = _matches.first;
 
     if (widget.tagsTextField.lowerCase) str = str.toLowerCase();
 
     str = str.trim();
 
     if (_suggestions != null) {
-      if (_matches.isNotEmpty) {
+      if (_matches.isNotEmpty || !_constraintSuggestion) {
         if (onSubmitted != null) onSubmitted(str);
         setState(() {
           _matches = [];
@@ -155,7 +158,10 @@ class _SuggestionsTextFieldState extends State<SuggestionsTextField> {
       if (_matches.length > 1) _matches.removeWhere((String mtc) => mtc == str);
 
       setState(() {
-        _helperCheck = _matches.isNotEmpty || str.isEmpty ? true : false;
+        _helperCheck =
+            _matches.isNotEmpty || str.isEmpty || !_constraintSuggestion
+                ? true
+                : false;
         _matches.sort((a, b) => a.compareTo(b));
       });
     }
@@ -171,8 +177,11 @@ class TagsTextField {
       {this.lowerCase = false,
       this.textStyle = const TextStyle(fontSize: 14),
       this.width = 200,
+      this.padding,
+      this.enabled = true,
       this.duplicates = false,
       this.suggestions,
+      this.constraintSuggestion = true,
       this.autocorrect,
       this.autofocus,
       this.hintText,
@@ -188,11 +197,16 @@ class TagsTextField {
       this.onChanged});
 
   final double width;
+  final EdgeInsets? padding;
+  final bool enabled;
   final bool duplicates;
   final TextStyle textStyle;
   final InputDecoration? inputDecoration;
   final bool? autocorrect;
   final List<String>? suggestions;
+
+  /// Allows you to insert tags not present in the list of suggestions
+  final bool constraintSuggestion;
   final bool lowerCase;
   final bool? autofocus;
   final String? hintText;

@@ -8,8 +8,8 @@ typedef OnPressedCallback = void Function(Item i);
 /// Used by [ItemTags.OnLongPressed].
 typedef OnLongPressedCallback = void Function(Item i);
 
-/// Used by [ItemTags.onRemoved].
-typedef OnRemovedCallback = void Function();
+/// Used by [ItemTags.removeButton.onRemoved].
+typedef OnRemovedCallback = bool Function();
 
 /// combines icon text or image
 enum ItemTagsCombine {
@@ -21,7 +21,6 @@ enum ItemTagsCombine {
   withTextAfter
 }
 
-// ignore: must_be_immutable
 class ItemTags extends StatefulWidget {
   ItemTags(
       {required this.index,
@@ -51,7 +50,6 @@ class ItemTags extends StatefulWidget {
       this.colorShowDuplicate = Colors.red,
       this.onPressed,
       this.onLongPressed,
-      this.onRemoved,
       Key? key})
       : super(key: key);
 
@@ -136,9 +134,6 @@ class ItemTags extends StatefulWidget {
   /// callback
   final OnLongPressedCallback? onLongPressed;
 
-  /// callback
-  final OnRemovedCallback? onRemoved;
-
   @override
   _ItemTagsState createState() => _ItemTagsState();
 }
@@ -158,14 +153,18 @@ class _ItemTagsState extends State<ItemTags> {
       _dataListInherited!.list!.length = _dataListInherited!.itemCount!;
 
     if (_dataListInherited!.list!.length > (widget.index + 1) &&
+        // ignore: unnecessary_null_comparison
+        _dataListInherited!.list!.elementAt(widget.index) != null &&
         _dataListInherited!.list!.elementAt(widget.index).title !=
             widget.title) {
       // when an element is removed from the data source
       _dataListInherited!.list!.removeAt(widget.index);
 
       // when all item list changed in data source
-      if (_dataListInherited!.list!.elementAt(widget.index).title !=
-          widget.title)
+      // ignore: unnecessary_null_comparison
+      if (_dataListInherited!.list!.elementAt(widget.index) != null &&
+          _dataListInherited!.list!.elementAt(widget.index).title !=
+              widget.title)
         _dataListInherited!.list!
             .removeRange(widget.index, _dataListInherited!.list!.length);
     }
@@ -185,6 +184,7 @@ class _ItemTagsState extends State<ItemTags> {
       //print("replace");
       _dataListInherited!.list![widget.index] = DataList(
           title: widget.title,
+          index: widget.index,
           active: widget.singleItem ? false : widget.active,
           customData: widget.customData);
     }
@@ -201,7 +201,6 @@ class _ItemTagsState extends State<ItemTags> {
     if (_dataList != null) _dataList!.removeListener(_didValueChange);
 
     _dataList = _dataListInherited!.list!.elementAt(widget.index);
-    _dataList!.active = widget.active;
     _dataList!.addListener(_didValueChange);
   }
 
@@ -251,7 +250,6 @@ class _ItemTagsState extends State<ItemTags> {
                   _dataList!.active = true;
                 } else
                   _dataList!.active = !_dataList!.active;
-                widget.active = _dataList!.active;
 
                 if (widget.onPressed != null)
                   widget.onPressed!(Item(
@@ -319,7 +317,7 @@ class _ItemTagsState extends State<ItemTags> {
           )
         : text;
 
-    final List<Widget> list = [];
+    final List list = [];
 
     switch (widget.combine) {
       case ItemTagsCombine.onlyText:
@@ -383,29 +381,29 @@ class _ItemTagsState extends State<ItemTags> {
                     fit: BoxFit.fill,
                     child: GestureDetector(
                       child: Container(
-                        margin: widget.removeButton?.margin ??
+                        margin: widget.removeButton!.margin ??
                             EdgeInsets.only(left: 5),
-                        padding: (widget.removeButton?.padding ??
+                        padding: (widget.removeButton!.padding ??
                                 EdgeInsets.all(2)) *
                             (widget.textStyle.fontSize! / 14),
                         decoration: BoxDecoration(
-                          color: widget.removeButton?.backgroundColor ??
+                          color: widget.removeButton!.backgroundColor ??
                               Colors.black,
-                          borderRadius: widget.removeButton?.borderRadius ??
+                          borderRadius: widget.removeButton!.borderRadius ??
                               BorderRadius.circular(_initBorderRadius),
                         ),
-                        child: widget.removeButton?.padding as Widget? ??
+                        child: widget.removeButton!.padding as Widget? ??
                             Icon(
                               Icons.clear,
-                              color: widget.removeButton?.color ?? Colors.white,
-                              size: (widget.removeButton?.size ?? 12) *
+                              color: widget.removeButton!.color ?? Colors.white,
+                              size: (widget.removeButton!.size ?? 12) *
                                   (widget.textStyle.fontSize! / 14),
                             ),
                       ),
                       onTap: () {
-                        if (widget.onRemoved != null) {
-                          _dataListInherited!.list!.removeAt(widget.index);
-                          widget.onRemoved!();
+                        if (widget.removeButton!.onRemoved != null) {
+                          if (widget.removeButton!.onRemoved!())
+                            _dataListInherited!.list!.removeAt(widget.index);
                         }
                       },
                     )))
@@ -439,6 +437,8 @@ class _ItemTagsState extends State<ItemTags> {
   /// Single item selection
   void _singleItem(DataListInherited dataSetIn, DataList? dataSet) {
     dataSetIn.list!
+        // ignore: unnecessary_null_comparison
+        .where((tg) => tg != null)
         .where((tg) => tg.active)
         .where((tg2) => tg2 != dataSet)
         .forEach((tg) => tg.active = false);
@@ -486,7 +486,8 @@ class ItemTagsRemoveButton {
       this.color,
       this.borderRadius,
       this.padding,
-      this.margin});
+      this.margin,
+      this.onRemoved});
 
   final IconData? icon;
   final double? size;
@@ -495,4 +496,7 @@ class ItemTagsRemoveButton {
   final BorderRadius? borderRadius;
   final EdgeInsets? padding;
   final EdgeInsets? margin;
+
+  /// callback
+  final OnRemovedCallback? onRemoved;
 }
